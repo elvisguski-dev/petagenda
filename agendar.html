@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Agendar banho e tosa</title>
+<style>
+:root{--bg:#f5f3ee;--ink:#1c2b2e;--mut:#66777c;--line:#e5e1d6;--pri:#0f766e;--pri-l:#e0f2ef;--err:#b91c1c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:520px;margin:auto;padding:20px 16px 50px}
+h1{font-size:24px;margin:8px 0 2px;letter-spacing:-.4px}
+.sub{color:var(--mut);margin:0 0 18px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h2{font-size:15px;margin:0 0 10px;color:var(--pri)}
+label{display:block;font-size:13px;font-weight:600;color:var(--mut);margin:0 0 4px}
+input,select{width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:11px 12px;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:2px solid var(--pri);outline-offset:-1px}
+.f{margin-bottom:12px}.f:last-child{margin-bottom:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts{display:grid;gap:8px}
+.opt{border:1px solid var(--line);border-radius:12px;padding:11px 13px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.opt.on{border-color:var(--pri);background:var(--pri-l)}
+.opt small{color:var(--mut);display:block}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.slots button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 0;font:inherit;font-weight:700;cursor:pointer}
+.slots button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.go{width:100%;border:0;background:var(--pri);color:#fff;font:inherit;font-weight:700;padding:14px;border-radius:14px;cursor:pointer;font-size:17px}
+.go:disabled{opacity:.5}
+.err{background:#fee2e2;color:var(--err);padding:10px 12px;border-radius:10px;margin-bottom:12px;display:none}
+.mut{color:var(--mut)}
+.ok{text-align:center;padding:30px 10px}.ok .big{font-size:56px}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><p class="mut">Carregando…</p></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl=v=>'R$ '+Number(v||0).toFixed(2).replace('.',',');
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+let I,sel={srv:null,porte:'M',hora:null};
+
+async function api(m,u,b){
+  const r=await fetch(u,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined});
+  let j={};try{j=await r.json()}catch(e){}
+  if(!r.ok)throw new Error(j.erro||'Erro '+r.status);return j}
+
+async function init(){
+  I=await api('GET','/api/publico/info');
+  document.title='Agendar · '+I.negocio;
+  const hoje=iso(new Date());
+  $('#app').innerHTML=`<h1>🐾 ${esc(I.negocio)}</h1><p class="sub">Agende o banho e a tosa do seu pet em menos de 1 minuto.${I.endereco?'<br>'+esc(I.endereco):''}</p>
+  <div class="err" id="err"></div>
+  <div class="card"><h2>1. Seu pet</h2>
+    <div class="f"><label>Nome do pet</label><input id="pet" placeholder="Ex.: Thor"></div>
+    <div class="two"><div class="f"><label>Espécie</label><select id="esp"><option>cão</option><option>gato</option></select></div>
+    <div class="f"><label>Porte</label><select id="porte" onchange="sel.porte=this.value;prices()"><option value="P">Pequeno (até 10 kg)</option><option value="M" selected>Médio (10–25 kg)</option><option value="G">Grande (25 kg+)</option></select></div></div></div>
+  <div class="card"><h2>2. Serviço</h2><div class="opts" id="srv"></div></div>
+  <div class="card"><h2>3. Dia e horário</h2>
+    <div class="f"><label>Data</label><input type="date" id="dia" min="${hoje}" onchange="slots()"></div>
+    <div class="slots" id="slots"><span class="mut">Escolha o serviço e a data.</span></div></div>
+  <div class="card"><h2>4. Seus dados</h2>
+    <div class="f"><label>Seu nome</label><input id="nome" autocomplete="name"></div>
+    <div class="f"><label>WhatsApp com DDD</label><input id="tel" type="tel" autocomplete="tel" placeholder="(51) 99999-9999"></div>
+    <p class="mut" style="font-size:13px;margin:0">Você receberá a confirmação e os lembretes por WhatsApp.</p></div>
+  <button class="go" id="go" onclick="enviar()">Confirmar agendamento</button>
+  ${I.telefone_negocio?`<p class="mut" style="text-align:center;font-size:14px">Dúvidas? ${esc(I.telefone_negocio)}</p>`:''}`;
+  $('#srv').innerHTML=I.servicos.map(s=>`<div class="opt" data-id="${s.id}" onclick="pickSrv(${s.id})"><div><b>${esc(s.nome)}</b><small>${s.duracao_min} min</small></div><b class="pr"></b></div>`).join('');
+  prices();
+}
+function prices(){document.querySelectorAll('.opt').forEach(o=>{const s=I.servicos.find(x=>x.id==o.dataset.id);o.querySelector('.pr').textContent=brl(s['preco_'+sel.porte.toLowerCase()])})}
+function pickSrv(id){sel.srv=id;document.querySelectorAll('.opt').forEach(o=>o.classList.toggle('on',o.dataset.id==id));slots()}
+async function slots(){
+  const box=$('#slots'),d=$('#dia').value;sel.hora=null;
+  if(!sel.srv||!d){box.innerHTML='<span class="mut">Escolha o serviço e a data.</span>';return}
+  box.innerHTML='<span class="mut">Buscando horários…</span>';
+  try{const h=await api('GET',`/api/publico/horarios?data=${d}&servico_id=${sel.srv}`);
+    box.innerHTML=h.length?h.map(x=>`<button onclick="pickH(this,'${x}')">${x}</button>`).join(''):'<span class="mut" style="grid-column:1/-1">Sem horários livres neste dia. Tente outra data.</span>'}
+  catch(e){box.innerHTML=`<span class="mut" style="grid-column:1/-1">${esc(e.message)}</span>`}
+}
+function pickH(b,h){sel.hora=h;document.querySelectorAll('#slots button').forEach(x=>x.classList.remove('on'));b.classList.add('on')}
+function erro(m){const e=$('#err');e.textContent=m;e.style.display='block';e.scrollIntoView({behavior:'smooth',block:'center'})}
+async function enviar(){
+  $('#err').style.display='none';
+  if(!$('#pet').value.trim())return erro('Informe o nome do pet.');
+  if(!sel.srv)return erro('Escolha um serviço.');
+  if(!$('#dia').value||!sel.hora)return erro('Escolha o dia e o horário.');
+  if(!$('#nome').value.trim())return erro('Informe seu nome.');
+  if($('#tel').value.replace(/\D/g,'').length<10)return erro('Informe seu WhatsApp com DDD.');
+  const b=$('#go');b.disabled=true;b.textContent='Agendando…';
+  try{const r=await api('POST','/api/publico/agendar',{nome:$('#nome').value,telefone:$('#tel').value,pet_nome:$('#pet').value,especie:$('#esp').value,porte:sel.porte,servico_id:sel.srv,inicio:$('#dia').value+' '+sel.hora});
+    $('#app').innerHTML=`<div class="card ok"><div class="big">✅</div><h1>Agendado!</h1><p><b>${esc(r.pet)}</b> · ${esc(r.servico)}<br>${esc(r.data)} às <b>${esc(r.hora)}</b><br>${brl(r.valor)}</p>
+    <p class="mut">Enviamos a confirmação no seu WhatsApp. Responda <b>1</b> para confirmar ou <b>2</b> para cancelar.</p></div>`;window.scrollTo(0,0)}
+  catch(e){erro(e.message);b.disabled=false;b.textContent='Confirmar agendamento';if(/lotado|indispon|próximo/i.test(e.message))slots()}
+}
+init().catch(e=>$('#app').innerHTML='<p>Não foi possível carregar. Tente novamente em instantes.</p>');
+</script>
+</body>
+</html>

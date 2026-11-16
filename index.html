@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PetAgenda</title>
+<style>
+:root{--bg:#f5f3ee;--card:#fff;--ink:#1c2b2e;--mut:#66777c;--line:#e5e1d6;--pri:#0f766e;--pri-d:#0b5c56;--pri-l:#e0f2ef;--acc:#e8704f;--ok:#15803d;--warn:#b45309;--err:#b91c1c;--r:14px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:var(--pri);color:#fff;position:sticky;top:0;z-index:5}
+.top{max-width:1100px;margin:auto;display:flex;align-items:center;gap:18px;padding:10px 16px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:18px;letter-spacing:-.3px}
+nav{display:flex;gap:4px;overflow-x:auto}
+nav button{background:none;border:0;color:#d5efeb;padding:8px 12px;border-radius:999px;cursor:pointer;font:inherit;font-weight:600;white-space:nowrap}
+nav button.on,nav button:hover{background:rgba(255,255,255,.18);color:#fff}
+main{max-width:1100px;margin:auto;padding:18px 16px 60px}
+h2{margin:0 0 14px;font-size:22px;letter-spacing:-.3px}
+h3{margin:22px 0 10px;font-size:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.grid{display:grid;gap:12px}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.stat b{display:block;font-size:30px;letter-spacing:-1px}
+.stat span{color:var(--mut);font-size:13px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+button.b,a.b{border:0;border-radius:10px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer;background:var(--pri);color:#fff;text-decoration:none;display:inline-block}
+button.b:hover{background:var(--pri-d)}
+button.b.s{background:var(--pri-l);color:var(--pri-d)}
+button.b.s:hover{background:#cde9e4}
+button.b.d{background:#fde8e8;color:var(--err)}
+button.b.sm,a.b.sm{padding:5px 10px;font-size:13px}
+input,select,textarea{font:inherit;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;color:var(--ink);width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--pri);outline-offset:-1px}
+textarea{min-height:92px;resize:vertical}
+label{display:block;font-size:13px;font-weight:600;color:var(--mut);margin:0 0 4px}
+.f{margin-bottom:12px}
+.fg{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.chip{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700;background:#eee;color:#555}
+.c-agendado{background:#fef3c7;color:#92400e}.c-confirmado{background:#d1fae5;color:#065f46}
+.c-em_atendimento{background:#dbeafe;color:#1e40af}.c-concluido{background:#e5e7eb;color:#374151}
+.c-cancelado,.c-erro,.c-faltou{background:#fee2e2;color:#991b1b}
+.c-pendente{background:#fef3c7;color:#92400e}.c-enviada{background:#d1fae5;color:#065f46}
+.c-recebida{background:#dbeafe;color:#1e40af}.c-ignorada,.c-cancelada{background:#eee;color:#777}
+.ag{display:flex;gap:14px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;margin-bottom:8px;flex-wrap:wrap}
+.ag .hora{font-weight:800;font-size:18px;min-width:56px;color:var(--pri-d)}
+.ag .info{flex:1;min-width:180px}.ag .info small{color:var(--mut)}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);background:#faf9f5}
+tr:last-child td{border-bottom:0}
+td input{padding:6px 8px}
+.bar{display:flex;gap:6px;align-items:flex-end;height:90px}
+.bar div{flex:1;background:var(--pri-l);border-radius:6px 6px 0 0;position:relative;min-height:4px}
+.bar div i{position:absolute;top:-18px;left:0;right:0;text-align:center;font-style:normal;font-size:12px;font-weight:700}
+.bar div.h{background:var(--pri)}
+.bl{display:flex;gap:6px;font-size:11px;color:var(--mut);text-align:center}.bl span{flex:1}
+.banner{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;padding:12px 14px;border-radius:12px;margin-bottom:14px}
+.slots{display:flex;gap:6px;flex-wrap:wrap}
+.slots button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font:inherit;font-weight:600}
+.slots button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.mut{color:var(--mut)}.sm{font-size:13px}
+dialog{border:0;border-radius:18px;padding:22px;width:min(640px,94vw);box-shadow:0 20px 60px rgba(0,0,0,.3);max-height:92vh}
+dialog::backdrop{background:rgba(20,30,32,.5)}
+.pet{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px}
+.dias{display:flex;gap:6px;flex-wrap:wrap}.dias label{display:flex;gap:4px;align-items:center;margin:0;font-weight:500;color:var(--ink);border:1px solid var(--line);padding:5px 9px;border-radius:8px}.dias input{width:auto}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#1c2b2e;color:#fff;padding:10px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;z-index:20;max-width:90vw}
+#toast.on{opacity:1}#toast.err{background:var(--err)}
+.msg{white-space:pre-wrap;max-width:420px;font-size:13px}
+@media(max-width:640px){.pet{grid-template-columns:1fr 1fr}th:nth-child(n+4),td:nth-child(n+4){}}
+</style>
+</head>
+<body>
+<header><div class="top"><div class="logo">🐾 PetAgenda</div><nav id="nav"></nav></div></header>
+<main id="app"></main>
+<dialog id="dlg"></dialog>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl=v=>'R$ '+Number(v||0).toFixed(2).replace('.',',');
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const DIAS=['segunda','terça','quarta','quinta','sexta','sábado','domingo'];
+const dataBonita=s=>{const d=new Date(s+'T12:00:00');return `${DIAS[(d.getDay()+6)%7]}, ${pad(d.getDate())}/${pad(d.getMonth()+1)}`};
+const ST={agendado:'Agendado',confirmado:'Confirmado',em_atendimento:'Em atendimento',concluido:'Concluído',cancelado:'Cancelado',faltou:'Faltou',pendente:'Na fila',enviada:'Enviada',erro:'Erro',recebida:'Recebida',ignorada:'Ignorada',cancelada:'Cancelada'};
+const chip=s=>`<span class="chip c-${s}">${ST[s]||s}</span>`;
+const PORTES={P:'Pequeno',M:'Médio',G:'Grande'};
+let S={view:'painel',dia:iso(new Date()),msgFiltro:'',busca:''};
+
+async function api(m,u,b){
+  const r=await fetch(u,{method:m,headers:{'Content-Type':'application/json'},body:b?JSON.stringify(b):undefined});
+  let j={};try{j=await r.json()}catch(e){}
+  if(!r.ok) throw new Error(j.erro||('Erro '+r.status));
+  return j;
+}
+let tt;
+function toast(t,err){const e=$('#toast');e.textContent=t;e.className='on'+(err?' err':'');clearTimeout(tt);tt=setTimeout(()=>e.className='',err?4500:2500)}
+const tryit=async fn=>{try{return await fn()}catch(e){toast(e.message,true)}};
+function modal(html){$('#dlg').innerHTML=html;$('#dlg').showModal()}
+function fechar(){$('#dlg').close()}
+
+const TABS=[['painel','Painel'],['agenda','Agenda'],['clientes','Clientes'],['servicos','Serviços'],['mensagens','Mensagens'],['config','Configurações']];
+function go(v){S.view=v;$('#nav').innerHTML=TABS.map(([k,n])=>`<button class="${k===v?'on':''}" onclick="go('${k}')">${n}</button>`).join('');
+  ({painel:vPainel,agenda:vAgenda,clientes:vClientes,servicos:vServicos,mensagens:vMensagens,config:vConfig})[v]()}
+
+/* ---------- PAINEL ---------- */
+async function vPainel(){
+  const d=await api('GET','/api/dashboard');
+  const max=Math.max(1,...d.semana.map(x=>x.total));
+  $('#app').innerHTML=`
+  <h2>Painel</h2>
+  ${d.provedor==='simulado'?`<div class="banner"><b>Modo simulado:</b> as mensagens são registradas mas <b>não</b> são enviadas de verdade. Conecte seu WhatsApp em <a href="#" onclick="go('config');return false">Configurações</a>.</div>`:''}
+  ${d.erros?`<div class="banner"><b>${d.erros} mensagem(ns) com erro.</b> Veja em <a href="#" onclick="S.msgFiltro='erro';go('mensagens');return false">Mensagens</a>.</div>`:''}
+  <div class="grid g4">
+    <div class="card stat"><b>${d.hoje}</b><span>agendamentos hoje</span></div>
+    <div class="card stat"><b>${d.a_confirmar}</b><span>aguardando confirmação</span></div>
+    <div class="card stat"><b>${d.enviadas_hoje}</b><span>mensagens enviadas hoje · ${d.fila} na fila</span></div>
+    <div class="card stat"><b>${brl(d.receita_hoje)}</b><span>faturado hoje (concluídos)</span></div>
+  </div>
+  <div class="grid g2" style="margin-top:12px">
+    <div class="card"><h3 style="margin-top:0">Hoje</h3>
+      ${d.hoje_lista.length?d.hoje_lista.map(a=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--line)"><b>${a.inicio.slice(11)}</b><span class="sp">${esc(a.pet_nome)} · ${esc(a.servico_nome)}</span>${chip(a.status)}</div>`).join(''):'<p class="mut">Nenhum agendamento para hoje.</p>'}
+      <div style="margin-top:12px"><button class="b s sm" onclick="go('agenda')">Abrir agenda</button></div></div>
+    <div class="card"><h3 style="margin-top:0">Próximos 7 dias</h3>
+      <div class="bar" style="margin-top:24px">${d.semana.map((x,i)=>`<div class="${i?'':'h'}" style="height:${Math.max(4,x.total/max*100)}%"><i>${x.total}</i></div>`).join('')}</div>
+      <div class="bl" style="margin-top:6px">${d.semana.map(x=>`<span>${dataBonita(x.data).slice(0,3)}</span>`).join('')}</div>
+      <p class="sm mut" style="margin-bottom:0">${d.recebidas_hoje} resposta(s) de clientes recebida(s) hoje.</p></div>
+  </div>`;
+}
+
+/* ---------- AGENDA ---------- */
+function mudaDia(n){const d=new Date(S.dia+'T12:00:00');d.setDate(d.getDate()+n);S.dia=iso(d);vAgenda()}
+async function vAgenda(){
+  const list=await api('GET','/api/agendamentos?de='+S.dia);
+  const btn=(a)=>{const b=[];
+    if(a.status==='agendado')b.push(['confirmado','Confirmar','s']);
+    if(a.status==='confirmado')b.push(['em_atendimento','Iniciar','s']);
+    if(['agendado','confirmado'].includes(a.status))b.push(['em_atendimento','Iniciar','s']);
+    if(a.status==='em_atendimento')b.push(['concluido','Concluir','']);
+    return [...new Map(b.map(x=>[x[0],x])).values()].map(([s,t,c])=>`<button class="b sm ${c}" onclick="setSt(${a.id},'${s}')">${t}</button>`).join('')
+    +(['agendado','confirmado'].includes(a.status)?`<button class="b s sm" onclick="remarcar(${a.id})">Remarcar</button><button class="b s sm" onclick="setSt(${a.id},'faltou')">Faltou</button><button class="b d sm" onclick="cancelar(${a.id})">Cancelar</button>`:'')};
+  $('#app').innerHTML=`
+  <div class="row"><h2 class="sp" style="margin:0">Agenda</h2><button class="b" onclick="novoAg()">+ Novo agendamento</button></div>
+  <div class="row" style="margin:14px 0">
+    <button class="b s sm" onclick="mudaDia(-1)">◀</button>
+    <input type="date" value="${S.dia}" style="width:auto" onchange="S.dia=this.value;vAgenda()">
+    <button class="b s sm" onclick="mudaDia(1)">▶</button>
+    <button class="b s sm" onclick="S.dia=iso(new Date());vAgenda()">Hoje</button>
+    <b>${dataBonita(S.dia)}</b><span class="mut">· ${list.filter(a=>a.status!=='cancelado').length} horário(s)</span></div>
+  ${list.length?list.map(a=>`<div class="ag" style="${['cancelado','faltou'].includes(a.status)?'opacity:.55':''}">
+    <div class="hora">${a.inicio.slice(11)}</div>
+    <div class="info"><b>${esc(a.pet_nome)}</b> <small>(${PORTES[a.porte]||''})</small> · ${esc(a.servico_nome)}<br><small>${esc(a.cliente_nome)} · ${esc(a.telefone)} · ${brl(a.valor)}${a.origem==='publico'?' · agendou online':''}</small></div>
+    ${chip(a.status)}<div class="row">${btn(a)}<a class="b s sm" target="_blank" href="https://wa.me/${a.telefone}">WhatsApp</a></div></div>`).join(''):'<div class="card mut">Nada agendado neste dia.</div>'}`;
+}
+const setSt=(id,s)=>tryit(async()=>{await api('POST',`/api/agendamentos/${id}/status`,{status:s});toast('Atualizado');vAgenda()});
+const cancelar=id=>{if(confirm('Cancelar este horário? O cliente será avisado por WhatsApp.'))setSt(id,'cancelado')};
+
+async function novoAg(preCliente){
+  const [cl,sv]=await Promise.all([api('GET','/api/clientes'),api('GET','/api/servicos')]);
+  if(!cl.length){toast('Cadastre um cliente primeiro',true);return go('clientes')}
+  window._cl=cl;window._sv=sv;window._sel={hora:null};
+  modal(`<h2>Novo agendamento</h2>
+  <div class="fg"><div class="f"><label>Cliente</label><select id="a_cli" onchange="petsDe()">${cl.map(c=>`<option value="${c.id}" ${c.id==preCliente?'selected':''}>${esc(c.nome)} · ${esc(c.telefone)}</option>`).join('')}</select></div>
+  <div class="f"><label>Pet</label><select id="a_pet"></select></div></div>
+  <div class="fg"><div class="f"><label>Serviço</label><select id="a_srv" onchange="slots()">${sv.map(s=>`<option value="${s.id}">${esc(s.nome)} (${s.duracao_min} min)</option>`).join('')}</select></div>
+  <div class="f"><label>Data</label><input type="date" id="a_dia" value="${S.dia}" onchange="slots()"></div></div>
+  <div class="f"><label>Horário livre</label><div class="slots" id="a_slots"></div></div>
+  <div class="f"><label>Observações</label><input id="a_obs" placeholder="Ex.: pelo embolado, cuidado com as orelhas"></div>
+  <label style="display:flex;gap:6px;align-items:center;font-weight:500"><input type="checkbox" id="a_forcar" style="width:auto" onchange="slots()"> Encaixe: informar horário manualmente (ignora lotação)</label>
+  <input type="time" id="a_manual" style="display:none;margin-top:8px;width:auto">
+  <div class="row" style="margin-top:16px"><span class="sp"></span><button class="b s" onclick="fechar()">Cancelar</button><button class="b" onclick="salvarAg()">Agendar e avisar cliente</button></div>`);
+  petsDe();slots();
+}
+function petsDe(){const c=_cl.find(x=>x.id==$('#a_cli').value);$('#a_pet').innerHTML=(c.pets.length?c.pets:[]).map(p=>`<option value="${p.id}">${esc(p.nome)} (${PORTES[p.porte]})</option>`).join('')||'<option value="">— cliente sem pets —</option>'}
+async function slots(){
+  const f=$('#a_forcar').checked;$('#a_manual').style.display=f?'block':'none';
+  const box=$('#a_slots');box.innerHTML='<span class="mut">Carregando…</span>';_sel.hora=null;
+  try{const h=await api('GET',`/api/horarios?data=${$('#a_dia').value}&servico_id=${$('#a_srv').value}`);
+    box.innerHTML=h.length?h.map(x=>`<button onclick="pickH(this,'${x}')">${x}</button>`).join(''):'<span class="mut">Sem horários livres neste dia.</span>'}catch(e){box.innerHTML=`<span class="mut">${esc(e.message)}</span>`}
+}
+function pickH(b,h){_sel.hora=h;document.querySelectorAll('#a_slots button').forEach(x=>x.classList.remove('on'));b.classList.add('on')}
+const salvarAg=()=>tryit(async()=>{
+  const f=$('#a_forcar').checked,hora=f?$('#a_manual').value:_sel.hora;
+  if(!$('#a_pet').value)throw new Error('Escolha um pet (cadastre o pet no cliente)');
+  if(!hora)throw new Error('Escolha um horário');
+  await api('POST','/api/agendamentos',{pet_id:+$('#a_pet').value,servico_id:+$('#a_srv').value,inicio:$('#a_dia').value+' '+hora,obs:$('#a_obs').value,forcar:f});
+  S.dia=$('#a_dia').value;fechar();toast('Agendado! Confirmação entrando na fila do WhatsApp.');go('agenda')});
+
+async function remarcar(id){
+  const a=(await api('GET','/api/agendamentos?de='+S.dia)).find(x=>x.id===id);
+  window._ra=a;
+  modal(`<h2>Remarcar ${esc(a.pet_nome)}</h2>
+  <div class="fg"><div class="f"><label>Nova data</label><input type="date" id="r_dia" value="${a.inicio.slice(0,10)}" onchange="rslots()"></div></div>
+  <div class="f"><label>Horário livre</label><div class="slots" id="r_slots"></div></div>
+  <div class="row" style="margin-top:16px"><span class="sp"></span><button class="b s" onclick="fechar()">Cancelar</button><button class="b" onclick="salvarRem()">Remarcar e avisar</button></div>`);
+  window._rh=null;rslots();
+}
+async function rslots(){const box=$('#r_slots');_rh=null;try{const h=await api('GET',`/api/horarios?data=${$('#r_dia').value}&servico_id=${_ra.servico_id}`);
+  box.innerHTML=h.length?h.map(x=>`<button onclick="_rh='${x}';document.querySelectorAll('#r_slots button').forEach(y=>y.classList.remove('on'));this.classList.add('on')">${x}</button>`).join(''):'<span class="mut">Sem horários livres.</span>'}catch(e){box.textContent=e.message}}
+const salvarRem=()=>tryit(async()=>{if(!_rh)throw new Error('Escolha um horário');
+  await api('PUT','/api/agendamentos/'+_ra.id,{inicio:$('#r_dia').value+' '+_rh});S.dia=$('#r_dia').value;fechar();toast('Remarcado');go('agenda')});
+
+/* ---------- CLIENTES ---------- */
+async function vClientes(){
+  const cl=await api('GET','/api/clientes?q='+encodeURIComponent(S.busca));
+  $('#app').innerHTML=`<div class="row"><h2 class="sp" style="margin:0">Clientes</h2><button class="b" onclick="editCli()">+ Novo cliente</button></div>
+  <div class="f" style="margin:14px 0"><input id="busca" placeholder="Buscar por nome, telefone ou pet…" value="${esc(S.busca)}" oninput="clearTimeout(window._bt);window._bt=setTimeout(()=>{S.busca=this.value;vClientes().then(()=>{const i=$('#busca');i.focus();i.setSelectionRange(99,99)})},300)"></div>
+  <table><tr><th>Cliente</th><th>Telefone</th><th>Pets</th><th></th></tr>
+  ${cl.map(c=>`<tr><td><b>${esc(c.nome)}</b>${c.optout?' <span class="chip">sem marketing</span>':''}</td><td>${esc(c.telefone)}</td>
+  <td>${c.pets.map(p=>`${esc(p.nome)} <span class="mut sm">(${PORTES[p.porte]})</span>`).join(', ')||'<span class="mut">—</span>'}</td>
+  <td style="text-align:right;white-space:nowrap"><button class="b sm" onclick="novoAg(${c.id})">Agendar</button> <button class="b s sm" onclick="editCli(${c.id})">Editar</button> <button class="b s sm" onclick="msgCli(${c.id})">Mensagem</button></td></tr>`).join('')||'<tr><td colspan="4" class="mut">Nenhum cliente encontrado.</td></tr>'}</table>`;
+}
+const petRow=p=>`<div class="pet"><input placeholder="Nome do pet" value="${esc(p.nome||'')}" data-k="nome"><select data-k="especie">${['cão','gato'].map(e=>`<option ${p.especie===e?'selected':''}>${e}</option>`).join('')}</select>
+<select data-k="porte">${Object.entries(PORTES).map(([k,v])=>`<option value="${k}" ${(p.porte||'M')===k?'selected':''}>${v}</option>`).join('')}</select><input placeholder="Raça" value="${esc(p.raca||'')}" data-k="raca"><button class="b d sm" onclick="this.parentNode.remove()">✕</button><input type="hidden" data-k="id" value="${p.id||''}"></div>`;
+async function editCli(id){
+  const c=id?(await api('GET','/api/clientes')).find(x=>x.id===id):{nome:'',telefone:'',obs:'',pets:[{}]};
+  window._ci=id;
+  modal(`<h2>${id?'Editar cliente':'Novo cliente'}</h2>
+  <div class="fg"><div class="f"><label>Nome</label><input id="c_nome" value="${esc(c.nome)}"></div><div class="f"><label>WhatsApp (com DDD)</label><input id="c_tel" value="${esc(c.telefone)}" placeholder="(51) 99999-9999"></div></div>
+  <div class="f"><label>Observações</label><input id="c_obs" value="${esc(c.obs)}"></div>
+  <h3>Pets</h3><div id="c_pets">${(c.pets.length?c.pets:[{}]).map(petRow).join('')}</div>
+  <button class="b s sm" onclick="$('#c_pets').insertAdjacentHTML('beforeend',petRow({}))">+ Adicionar pet</button>
+  ${id?`<p class="sm mut">Remover um pet apaga também o histórico de agendamentos dele.</p>
+  <label style="display:flex;gap:6px;align-items:center;font-weight:500"><input type="checkbox" id="c_opt" style="width:auto" ${c.optout?'checked':''}> Não enviar lembretes de retorno/pós-atendimento</label>`:''}
+  <div class="row" style="margin-top:16px">${id?`<button class="b d" onclick="delCli(${id})">Excluir</button>`:''}<span class="sp"></span><button class="b s" onclick="fechar()">Cancelar</button><button class="b" onclick="salvarCli()">Salvar</button></div>`);
+}
+const salvarCli=()=>tryit(async()=>{
+  const pets=[...document.querySelectorAll('#c_pets .pet')].map(r=>{const o={};r.querySelectorAll('[data-k]').forEach(i=>o[i.dataset.k]=i.value);if(o.id)o.id=+o.id;else delete o.id;return o});
+  const b={nome:$('#c_nome').value,telefone:$('#c_tel').value,obs:$('#c_obs').value,pets,optout:$('#c_opt')?$('#c_opt').checked:false};
+  if(_ci)await api('PUT','/api/clientes/'+_ci,b);else await api('POST','/api/clientes',b);
+  fechar();toast('Cliente salvo');vClientes()});
+const delCli=id=>{if(confirm('Excluir cliente, pets e agendamentos dele?'))tryit(async()=>{await api('DELETE','/api/clientes/'+id);fechar();vClientes()})};
+function msgCli(id){modal(`<h2>Enviar mensagem</h2><div class="f"><textarea id="m_txt" placeholder="Digite a mensagem de WhatsApp…"></textarea></div>
+<div class="row"><span class="sp"></span><button class="b s" onclick="fechar()">Cancelar</button><button class="b" onclick="enviaMsg(${id})">Enviar</button></div>`)}
+const enviaMsg=id=>tryit(async()=>{await api('POST','/api/mensagens/enviar',{cliente_id:id,texto:$('#m_txt').value});fechar();toast('Mensagem na fila')});
+
+/* ---------- SERVIÇOS ---------- */
+async function vServicos(){
+  const sv=await api('GET','/api/servicos');
+  $('#app').innerHTML=`<div class="row"><h2 class="sp" style="margin:0">Serviços e preços</h2><button class="b" onclick="novoSrv()">+ Novo serviço</button></div>
+  <p class="mut">O preço é aplicado automaticamente conforme o porte do pet (P/M/G). A duração define quantos horários o serviço ocupa.</p>
+  <table><tr><th>Serviço</th><th>Duração (min)</th><th>Pequeno</th><th>Médio</th><th>Grande</th><th></th></tr>
+  ${sv.map(s=>`<tr data-id="${s.id}"><td><input value="${esc(s.nome)}" data-k="nome"></td><td><input type="number" step="15" min="15" value="${s.duracao_min}" data-k="duracao_min" style="width:90px"></td>
+  ${['p','m','g'].map(k=>`<td><input type="number" step="0.5" min="0" value="${s['preco_'+k]}" data-k="preco_${k}" style="width:90px"></td>`).join('')}
+  <td style="white-space:nowrap"><button class="b sm" onclick="salvaSrv(this)">Salvar</button> <button class="b d sm" onclick="delSrv(${s.id})">✕</button></td></tr>`).join('')}</table>`;
+}
+const salvaSrv=b=>tryit(async()=>{const tr=b.closest('tr'),o={};tr.querySelectorAll('[data-k]').forEach(i=>o[i.dataset.k]=i.value);await api('PUT','/api/servicos/'+tr.dataset.id,o);toast('Serviço salvo')});
+const delSrv=id=>{if(confirm('Remover este serviço da lista? (agendamentos antigos são mantidos)'))tryit(async()=>{await api('DELETE','/api/servicos/'+id);vServicos()})};
+function novoSrv(){modal(`<h2>Novo serviço</h2><div class="fg"><div class="f"><label>Nome</label><input id="n_nome"></div><div class="f"><label>Duração (min)</label><input id="n_dur" type="number" value="60" step="15"></div></div>
+<div class="fg"><div class="f"><label>Preço P</label><input id="n_p" type="number" step="0.5"></div><div class="f"><label>Preço M</label><input id="n_m" type="number" step="0.5"></div><div class="f"><label>Preço G</label><input id="n_g" type="number" step="0.5"></div></div>
+<div class="row"><span class="sp"></span><button class="b s" onclick="fechar()">Cancelar</button><button class="b" onclick="salvaNovoSrv()">Criar</button></div>`)}
+const salvaNovoSrv=()=>tryit(async()=>{await api('POST','/api/servicos',{nome:$('#n_nome').value,duracao_min:$('#n_dur').value,preco_p:$('#n_p').value,preco_m:$('#n_m').value,preco_g:$('#n_g').value});fechar();vServicos()});
+
+/* ---------- MENSAGENS ---------- */
+async function vMensagens(){
+  const ms=await api('GET','/api/mensagens'+(S.msgFiltro?'?status='+S.msgFiltro:''));
+  const TIPOS={confirmacao:'Confirmação',lembrete_24h:'Lembrete 24h',lembrete_2h:'Lembrete 2h',pronto:'Pet pronto',pos:'Pós-atendimento',retorno:'Retorno',cancelado:'Cancelamento',remarcado:'Remarcação',resposta:'Resposta do cliente',manual:'Manual',teste:'Teste',fallback:'Resposta automática',resp_confirmado:'Resposta automática',resp_cancelado:'Resposta automática',resp_remarcar:'Resposta automática',resp_parar:'Resposta automática'};
+  $('#app').innerHTML=`<div class="row"><h2 class="sp" style="margin:0">Mensagens</h2><button class="b s" onclick="rodaFila()">Processar fila agora</button></div>
+  <div class="row" style="margin:14px 0">${[['','Todas'],['pendente','Na fila'],['enviada','Enviadas'],['recebida','Recebidas'],['erro','Com erro']].map(([k,n])=>`<button class="b sm ${S.msgFiltro===k?'':'s'}" onclick="S.msgFiltro='${k}';vMensagens()">${n}</button>`).join('')}</div>
+  <table><tr><th>Quando</th><th>Para / de</th><th>Tipo</th><th>Mensagem</th><th>Status</th><th></th></tr>
+  ${ms.map(m=>`<tr><td class="sm" style="white-space:nowrap">${(m.direcao==='entrada'?m.criado:(m.enviada_em||m.enviar_em)||'').slice(5,16).replace('-','/')}</td>
+  <td>${m.direcao==='entrada'?'⬅️':'➡️'} ${esc(m.cliente_nome||'')}<br><span class="mut sm">${esc(m.telefone)}</span></td><td class="sm">${TIPOS[m.tipo]||m.tipo}</td>
+  <td class="msg">${esc(m.texto)}${m.erro?`<br><span style="color:var(--err)">${esc(m.erro)}</span>`:''}</td><td>${chip(m.status)}</td>
+  <td style="white-space:nowrap">${['erro','ignorada','cancelada'].includes(m.status)&&m.direcao==='saida'?`<button class="b s sm" onclick="reenviar(${m.id})">Reenviar</button>`:''}${m.status==='pendente'?`<button class="b d sm" onclick="cancelaMsg(${m.id})">Cancelar</button>`:''}</td></tr>`).join('')||'<tr><td colspan="6" class="mut">Nenhuma mensagem ainda.</td></tr>'}</table>`;
+}
+const reenviar=id=>tryit(async()=>{await api('POST',`/api/mensagens/${id}/reenviar`);toast('Reenfileirada');setTimeout(vMensagens,1500)});
+const cancelaMsg=id=>tryit(async()=>{await api('DELETE','/api/mensagens/'+id);vMensagens()});
+const rodaFila=()=>tryit(async()=>{const r=await api('POST','/api/fila/processar');toast(r.enviadas+' mensagem(ns) enviada(s)');vMensagens()});
+
+/* ---------- CONFIG ---------- */
+const TPL=[['confirmacao','Confirmação (logo após agendar)'],['lembrete_24h','Lembrete 24h antes'],['lembrete_2h','Lembrete 2h antes'],['pronto','Pet pronto para buscar'],['pos','Pós-atendimento (dia seguinte)'],['retorno','Lembrete de retorno'],['cancelado','Cancelamento'],['remarcado','Remarcação'],['resp_confirmado','Resposta: cliente confirmou (1)'],['resp_cancelado','Resposta: cliente cancelou (2)'],['resp_remarcar','Resposta: cliente quer remarcar (3)'],['resp_parar','Resposta: cliente pediu PARAR'],['fallback','Resposta para mensagens não reconhecidas']];
+async function vConfig(){
+  const c=await api('GET','/api/config');window._cfg=c;
+  const inp=(k,l,t='text',ph='')=>`<div class="f"><label>${l}</label><input data-c="${k}" type="${t}" value="${esc(c[k])}" placeholder="${ph}"></div>`;
+  const chk=(k,l)=>`<label style="display:flex;gap:8px;align-items:center;font-weight:500;color:var(--ink);margin-bottom:8px"><input type="checkbox" data-c="${k}" style="width:auto" ${c[k]?'checked':''}> ${l}</label>`;
+  $('#app').innerHTML=`<div class="row"><h2 class="sp" style="margin:0">Configurações</h2><button class="b" onclick="salvaCfg()">Salvar tudo</button></div>
+  <div class="grid g2" style="margin-top:14px">
+  <div class="card"><h3 style="margin-top:0">Seu negócio</h3>${inp('negocio','Nome do pet shop')}${inp('telefone_negocio','Telefone')}${inp('endereco','Endereço')}${inp('url_publica','Endereço público do sistema (usado nos links das mensagens)','text','https://agenda.meupetshop.com.br')}
+    <p class="sm">Link para seus clientes agendarem sozinhos: <b id="lnk"></b></p></div>
+  <div class="card"><h3 style="margin-top:0">Funcionamento</h3><div class="fg">${inp('abre','Abre às','time')}${inp('fecha','Fecha às','time')}${inp('pausa_inicio','Pausa de','time')}${inp('pausa_fim','Pausa até','time')}</div>
+    <div class="f"><label>Dias de atendimento</label><div class="dias">${DIAS.map((d,i)=>`<label><input type="checkbox" data-dia="${i}" ${c.dias_funcionamento.includes(i)?'checked':''}>${d.slice(0,3)}</label>`).join('')}</div></div>
+    <div class="fg">${inp('capacidade','Pets ao mesmo tempo','number')}${inp('passo_min','Intervalo entre horários (min)','number')}${inp('antecedencia_min_horas','Antecedência mínima online (h)','number')}</div></div>
+  <div class="card"><h3 style="margin-top:0">Automação</h3>${chk('lembrete_24h','Lembrete 24h antes do horário')}${chk('lembrete_2h','Lembrete 2h antes')}${chk('pos_atendimento','Mensagem de pós-atendimento (dia seguinte)')}${chk('resposta_automatica','Responder automaticamente (1 confirma, 2 cancela, 3 remarcar)')}
+    ${inp('retorno_dias','Lembrete de retorno após quantos dias? (0 = desligado)','number')}
+    <div class="fg">${inp('janela_envio_inicio','Enviar mensagens a partir de','time')}${inp('janela_envio_fim','…até','time')}${inp('intervalo_envio_seg','Intervalo entre envios (seg)','number')}</div>
+    <p class="sm mut">Fora da janela, só confirmações e respostas ao cliente são enviadas. O intervalo evita bloqueio do número.</p></div>
+  <div class="card"><h3 style="margin-top:0">Conexão WhatsApp</h3>
+    <div class="f"><label>Provedor</label><select data-c="provedor" onchange="provVis(this.value)"><option value="simulado">Simulado (teste, não envia)</option><option value="evolution">Evolution API</option><option value="zapi">Z-API</option><option value="cloud">WhatsApp Cloud API (Meta oficial)</option></select></div>
+    <div data-p="evolution">${inp('evolution_url','URL da Evolution API','text','https://evolution.meusite.com')}${inp('evolution_instancia','Nome da instância')}${inp('evolution_apikey','API Key','password')}</div>
+    <div data-p="zapi">${inp('zapi_instancia','ID da instância')}${inp('zapi_token','Token da instância','password')}${inp('zapi_client_token','Client-Token de segurança','password')}</div>
+    <div data-p="cloud">${inp('cloud_phone_id','Phone Number ID')}${inp('cloud_token','Token de acesso permanente','password')}</div>
+    ${inp('webhook_token','Token do webhook (recomendado)','password')}
+    <p class="sm">URL do webhook para o provedor: <b id="whk" style="word-break:break-all"></b></p>
+    <div class="row"><input id="t_tel" placeholder="Seu WhatsApp para teste" style="flex:1"><button class="b s" onclick="testaZap()">Enviar teste</button></div></div>
+  </div>
+  <h3>Textos das mensagens</h3><p class="mut sm">Variáveis: {cliente} {pet} {servico} {data} {hora} {valor} {negocio} {link} {dias}</p>
+  <div class="grid g2">${TPL.map(([k,n])=>`<div class="card"><label>${n}</label><textarea data-t="${k}">${esc(c.templates[k])}</textarea><button class="b s sm" style="margin-top:6px" onclick="this.previousElementSibling.value=_cfg.templates_padrao['${k}']">Restaurar padrão</button></div>`).join('')}</div>`;
+  document.querySelector('[data-c=provedor]').value=c.provedor;provVis(c.provedor);
+  $('#lnk').textContent=location.origin+'/agendar';
+  $('#whk').textContent=location.origin+'/webhook/whatsapp'+(c.webhook_token?'?token=SEU_TOKEN':'');
+}
+const provVis=v=>document.querySelectorAll('[data-p]').forEach(d=>d.style.display=d.dataset.p===v?'block':'none');
+function coletaCfg(){const o={templates:{},dias_funcionamento:[]};
+  document.querySelectorAll('[data-c]').forEach(i=>o[i.dataset.c]=i.type==='checkbox'?i.checked:i.value);
+  document.querySelectorAll('[data-dia]').forEach(i=>{if(i.checked)o.dias_funcionamento.push(+i.dataset.dia)});
+  document.querySelectorAll('[data-t]').forEach(i=>o.templates[i.dataset.t]=i.value);return o}
+const salvaCfg=()=>tryit(async()=>{await api('PUT','/api/config',coletaCfg());toast('Configurações salvas');vConfig()});
+const testaZap=()=>tryit(async()=>{await api('PUT','/api/config',coletaCfg());const r=await api('POST','/api/config/testar',{telefone:$('#t_tel').value});
+  r.status==='enviada'?toast(r.provedor==='simulado'?'Simulado: nada foi enviado de verdade':'Teste enviado! Confira seu WhatsApp'):toast('Falhou: '+(r.erro||r.status),true)});
+
+go('painel');
+setInterval(()=>{if(S.view==='painel'&&!$('#dlg').open)vPainel()},30000);
+</script>
+</body>
+</html>

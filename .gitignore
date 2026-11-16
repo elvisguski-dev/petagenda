@@ -1,0 +1,6 @@
+# Banco de dados com dados de clientes (nunca versionar)
+*.db
+*.db-wal
+*.db-shm
+__pycache__/
+*.pyc
