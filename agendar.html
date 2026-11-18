@@ -2,10 +2,13 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<meta name="theme-color" content="#070b0a">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Agendar banho e tosa</title>
+<script>try{document.documentElement.dataset.tema=localStorage.getItem('tema')||'hacker'}catch(e){document.documentElement.dataset.tema='hacker'}</script>
 <style>
-:root{--bg:#f5f3ee;--ink:#1c2b2e;--mut:#66777c;--line:#e5e1d6;--pri:#0f766e;--pri-l:#e0f2ef;--err:#b91c1c}
+:root{--bg:#050a07;--card:#0a130d;--ink:#c9f7d8;--mut:#6fae86;--line:#134d2c;--pri:#00ff88;--pri-d:#00cc6a;--pri-l:rgba(0,255,136,.12);--acc:#ffb020;--ok:#00ff88;--warn:#ffb020;--err:#ff5470;--r:6px}
+:root[data-tema="claro"]{--bg:#f5f3ee;--ink:#1c2b2e;--mut:#66777c;--line:#e5e1d6;--pri:#0f766e;--pri-l:#e0f2ef;--err:#b91c1c}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
 .wrap{max-width:520px;margin:auto;padding:20px 16px 50px}
@@ -25,17 +28,52 @@ input:focus,select:focus{outline:2px solid var(--pri);outline-offset:-1px}
 .slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .slots button{border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 0;font:inherit;font-weight:700;cursor:pointer}
 .slots button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.slots>span{grid-column:1/-1}
 .go{width:100%;border:0;background:var(--pri);color:#fff;font:inherit;font-weight:700;padding:14px;border-radius:14px;cursor:pointer;font-size:17px}
 .go:disabled{opacity:.5}
 .err{background:#fee2e2;color:var(--err);padding:10px 12px;border-radius:10px;margin-bottom:12px;display:none}
 .mut{color:var(--mut)}
 .ok{text-align:center;padding:30px 10px}.ok .big{font-size:56px}
+
+/* ===== TEMA HACKER (padrao). Tema claro original: <html data-tema="claro"> ===== */
+body{font-family:ui-monospace,'JetBrains Mono','Fira Code','Cascadia Code',Consolas,'Courier New',monospace}
+html:not([data-tema="claro"]){color-scheme:dark}
+html:not([data-tema="claro"]) body{background:radial-gradient(ellipse at top,rgba(0,255,136,.07),transparent 60%),var(--bg)}
+html:not([data-tema="claro"]) body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.18) 3px)}
+html:not([data-tema="claro"]) ::selection{background:var(--pri);color:#021a0b}
+html:not([data-tema="claro"]) h1,html:not([data-tema="claro"]) h2,html:not([data-tema="claro"]) h3{color:var(--pri);text-shadow:0 0 10px rgba(0,255,136,.35)}
+html:not([data-tema="claro"]) input,html:not([data-tema="claro"]) select,html:not([data-tema="claro"]) textarea{background:#050a07;color:var(--ink);border-color:var(--line)}
+html:not([data-tema="claro"]) input:focus,html:not([data-tema="claro"]) select:focus,html:not([data-tema="claro"]) textarea:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 1px var(--pri),0 0 12px rgba(0,255,136,.35)}
+html:not([data-tema="claro"]) .card{background:var(--card);border-color:var(--line);box-shadow:0 0 0 1px rgba(0,255,136,.06)}
+
+html:not([data-tema="claro"]) .card{box-shadow:0 0 0 1px rgba(0,255,136,.06),0 10px 30px rgba(0,0,0,.5)}
+html:not([data-tema="claro"]) .opt{background:#050a07}
+html:not([data-tema="claro"]) .opt.on{background:rgba(0,255,136,.1);box-shadow:0 0 12px rgba(0,255,136,.25)}
+html:not([data-tema="claro"]) .slots button{background:#050a07;color:var(--ink)}
+html:not([data-tema="claro"]) .slots button:hover{border-color:var(--pri);color:var(--pri)}
+html:not([data-tema="claro"]) .slots button.on{background:var(--pri);color:#021a0b;box-shadow:0 0 12px rgba(0,255,136,.5)}
+html:not([data-tema="claro"]) .go{color:#021a0b;box-shadow:0 0 18px rgba(0,255,136,.4)}
+html:not([data-tema="claro"]) .err{background:rgba(255,84,112,.14);color:var(--err);border:1px solid #6b1d2c}
+.tt{text-align:center;margin-top:14px}.tt button{background:none;border:1px solid var(--line);color:var(--mut);border-radius:8px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
+
+
+@keyframes blink{50%{opacity:0}}
+html:not([data-tema="claro"]) h1::after{content:"_";animation:blink 1.1s steps(1) infinite}
+html:not([data-tema="claro"]) .card h2{text-transform:lowercase}
+html:not([data-tema="claro"]) .card h2::before{content:"// ";opacity:.5}
+html:not([data-tema="claro"]) label{text-transform:uppercase;letter-spacing:.6px;font-size:11px}
+html:not([data-tema="claro"]) input[type=date]::-webkit-calendar-picker-indicator{filter:invert(.8) sepia(1) saturate(3) hue-rotate(95deg)}
+@media (prefers-reduced-motion:reduce){html:not([data-tema="claro"]) h1::after{animation:none}}
+@media print{html:not([data-tema="claro"]) body::after{display:none}}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"><p class="mut">Carregando…</p></div>
 <script>
 const $=s=>document.querySelector(s);
+function aplicaTema(t){document.documentElement.dataset.tema=t;try{localStorage.setItem('tema',t)}catch(e){}const b=document.querySelector('#tema');if(b)b.textContent=t==='claro'?'>_ Hacker':'☀ Claro'}
+function trocaTema(){aplicaTema(document.documentElement.dataset.tema==='claro'?'hacker':'claro')}
+
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const brl=v=>'R$ '+Number(v||0).toFixed(2).replace('.',',');
 const pad=n=>String(n).padStart(2,'0');
@@ -66,7 +104,9 @@ async function init(){
     <div class="f"><label>WhatsApp com DDD</label><input id="tel" type="tel" autocomplete="tel" placeholder="(51) 99999-9999"></div>
     <p class="mut" style="font-size:13px;margin:0">Você receberá a confirmação e os lembretes por WhatsApp.</p></div>
   <button class="go" id="go" onclick="enviar()">Confirmar agendamento</button>
-  ${I.telefone_negocio?`<p class="mut" style="text-align:center;font-size:14px">Dúvidas? ${esc(I.telefone_negocio)}</p>`:''}`;
+  ${I.telefone_negocio?`<p class="mut" style="text-align:center;font-size:14px">Dúvidas? ${esc(I.telefone_negocio)}</p>`:''}
+  <div class="tt"><button id="tema" onclick="trocaTema()">☀ Claro</button></div>`;
+  aplicaTema(document.documentElement.dataset.tema||'hacker');
   $('#srv').innerHTML=I.servicos.map(s=>`<div class="opt" data-id="${s.id}" onclick="pickSrv(${s.id})"><div><b>${esc(s.nome)}</b><small>${s.duracao_min} min</small></div><b class="pr"></b></div>`).join('');
   prices();
 }

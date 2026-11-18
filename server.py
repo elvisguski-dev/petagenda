@@ -14,6 +14,7 @@ import os
 import random
 import re
 import sqlite3
+import sys
 import threading
 import time
 import unicodedata
@@ -25,12 +26,36 @@ from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+# Console do Windows (cp1252) nao aceita emojis: nunca deixar um print derrubar o envio.
+for _s in (sys.stdout, sys.stderr):
+    if _s is not None and hasattr(_s, "reconfigure"):
+        _s.reconfigure(errors="replace")
+
+
+def carregar_env():
+    """Le petagenda.env (CHAVE=VALOR) ao lado do server.py, sem sobrescrever variaveis ja definidas."""
+    p = Path(os.environ.get("PETAGENDA_ENV") or (Path(__file__).resolve().parent / "petagenda.env"))
+    try:
+        linhas = p.read_text(encoding="utf-8-sig").splitlines()
+    except OSError:
+        return
+    for ln in linhas:
+        ln = ln.strip()
+        if not ln or ln.startswith("#") or "=" not in ln:
+            continue
+        k, v = ln.split("=", 1)
+        os.environ.setdefault(k.strip(), v.strip())
+
+
+carregar_env()
+
 os.environ.setdefault("TZ", "America/Sao_Paulo")
 if hasattr(time, "tzset"):
     time.tzset()
 
 BASE = Path(__file__).resolve().parent
 DB_PATH = os.environ.get("PETAGENDA_DB", str(BASE / "petagenda.db"))
+HOST = os.environ.get("HOST", "0.0.0.0")
 PORT = int(os.environ.get("PORT", "8080"))
 SENHA = os.environ.get("PAINEL_SENHA", "")
 
@@ -1232,7 +1257,7 @@ class H(BaseHTTPRequestHandler):
 def main():
     init_db()
     threading.Thread(target=agendador, daemon=True).start()
-    srv = ThreadingHTTPServer(("0.0.0.0", PORT), H)
+    srv = ThreadingHTTPServer((HOST, PORT), H)
     print(f"PetAgenda rodando em http://localhost:{PORT}")
     print(f"  Painel:            http://localhost:{PORT}/")
     print(f"  Agendamento online: http://localhost:{PORT}/agendar")
