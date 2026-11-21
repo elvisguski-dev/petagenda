@@ -1,0 +1,4 @@
+# Scripts do Windows precisam manter CRLF (e BOM nos .ps1)
+*.bat -text
+*.ps1 -text
+*.ico binary

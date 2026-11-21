@@ -3,7 +3,26 @@
 Sistema de agenda para pet shop que **agenda, confirma, lembra e responde clientes sozinho pelo WhatsApp**.
 Só usa a biblioteca padrão do Python 3.9+ (não precisa instalar nada) e guarda tudo em um arquivo SQLite.
 
-## Como rodar
+> 🖥️ **Visual:** painel e página do cliente vêm no **tema hacker** (preto + verde neon). O botão no topo alterna para o tema claro original.
+
+## Instalar no Windows (recomendado)
+
+1. Baixe o projeto (botão verde **Code → Download ZIP**) e **extraia o ZIP inteiro**.
+2. Abra a pasta `instalador` e dê dois cliques em **`INSTALAR.bat`**.
+3. Responda as perguntas (porta, senha do painel e se deve iniciar com o Windows) e pronto.
+
+O instalador procura o Python 3.9+ (tenta instalar pelo `winget` se não achar), copia o programa para
+`%LOCALAPPDATA%\PetAgenda`, cria atalhos na Área de Trabalho e no Menu Iniciar e registra o programa em
+*Configurações → Aplicativos* para desinstalar depois. **Não precisa de administrador.**
+Rodar o `INSTALAR.bat` de novo **atualiza** o programa e mantém a senha, a configuração e todos os dados.
+
+Detalhes úteis:
+- O sistema só envia lembretes e respostas **enquanto o computador estiver ligado e o PetAgenda rodando**. Por isso o instalador oferece iniciar junto com o Windows.
+- Configuração em `%LOCALAPPDATA%\PetAgenda\petagenda.env` (`PORT`, `HOST`, `PAINEL_SENHA`). Por padrão só este computador acessa (`HOST=127.0.0.1`); use `0.0.0.0` para acessar de outros aparelhos da rede.
+- Ao desinstalar, ele pergunta se deve guardar uma cópia dos dados em *Documentos\PetAgenda-backup*.
+- Logs em `%LOCALAPPDATA%\PetAgenda\logs`.
+
+## Como rodar (manual, qualquer sistema)
 
 ```bash
 cd petagenda
@@ -14,7 +33,7 @@ PAINEL_SENHA="troque-esta-senha" python3 server.py
 - Cliente agenda sozinho: `http://localhost:8080/agendar`
 - Webhook de respostas: `http://SEU-DOMINIO:8080/webhook/whatsapp`
 
-Variáveis opcionais: `PORT` (padrão 8080), `PETAGENDA_DB` (caminho do banco), `TZ` (padrão America/Sao_Paulo).
+Variáveis opcionais: `PORT` (padrão 8080), `HOST` (padrão 0.0.0.0), `PETAGENDA_DB` (caminho do banco), `TZ`. Também podem ficar num arquivo `petagenda.env` ao lado do `server.py` (uma linha `CHAVE=valor`).
 
 > **Antes de publicar na internet:** defina `PAINEL_SENHA`, coloque atrás de HTTPS (Caddy, Nginx ou Cloudflare Tunnel) e preencha o *Endereço público* em Configurações.
 
@@ -55,6 +74,7 @@ petagenda/
 ├── server.py      # servidor, API, agendador automático, WhatsApp, webhook
 ├── index.html     # painel do dono (agenda, clientes, serviços, mensagens, config)
 ├── agendar.html   # página pública de autoagendamento
+├── instalador/    # instalador para Windows (INSTALAR.bat + scripts + ícone)
 └── petagenda.db   # criado no primeiro uso
 ```
 
